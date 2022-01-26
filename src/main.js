@@ -10,7 +10,8 @@ if (!process.env.PWD) {
   process.env.PWD = process.cwd();
 }
 
-const buildDir = `${process.env.PWD}/build`;
+const buildDir = `${process.env.PWD}/build/images`;
+const metaDir = `${process.env.PWD}/build/meta`;
 const metDataFile = "_metadata.json";
 const layersDir = `${process.env.PWD}/layers`;
 
@@ -72,7 +73,11 @@ const buildSetup = () => {
   if (fs.existsSync(buildDir)) {
     fs.rm(buildDir, { recursive: true });
   }
-  fs.mkdirSync(buildDir);
+  if (fs.existsSync(metaDir)) {
+    fs.rm(metaDir, { recursive: true });
+  }
+  fs.mkdirSync(buildDir, { recursive: true });
+  fs.mkdirSync(metaDir, { recursive: true });
 };
 
 const saveLayer = (_canvas, _edition) => {
@@ -85,12 +90,16 @@ const saveLayer = (_canvas, _edition) => {
 const addMetadata = (_edition) => {
   let dateTime = Date.now();
   let tempMetadata = {
-    hash: hash.join(""),
-    // decodedHash: decodedHash,
-    edition: _edition,
-    date: dateTime,
-    ipfs_url: `ipfs://NewUriToReplace/${_edition}.png`,
-    // attributes: attributes,
+    name: `Smol #${_edition}`,
+    description: "Your Description Here",
+    file_url: `ipfs://NewUriToReplace/${_edition}.png`,
+    custom_field: {
+      hash: hash.join(""),
+      // decodedHash: decodedHash,
+      edition: _edition,
+      date: dateTime,
+    },
+    attributes: attributes,
   };
   metadata.push(tempMetadata);
   attributes = [];
@@ -100,10 +109,10 @@ const addMetadata = (_edition) => {
 
 const addAttributes = (_element, _layer) => {
   let tempAttr = {
-    id: _element.id,
-    layer: _layer.name,
-    name: _element.name,
-    rarity: _element.rarity,
+    // id: _element.id,
+    trait_type: _layer.name,
+    value: _element.name,
+    // rarity: _element.rarity,
   };
   attributes.push(tempAttr);
   hash.push(_layer.id);
@@ -159,10 +168,10 @@ const createFiles = async (edition) => {
 };
 
 const createMetaData = () => {
-  fs.stat(`${buildDir}/${metDataFile}`, (err) => {
+  fs.stat(`${metaDir}/${metDataFile}`, (err) => {
     if (err == null || err.code === "ENOENT") {
       fs.writeFileSync(
-        `${buildDir}/${metDataFile}`,
+        `${metaDir}/${metDataFile}`,
         JSON.stringify(metadata, null, 2)
       );
     } else {
