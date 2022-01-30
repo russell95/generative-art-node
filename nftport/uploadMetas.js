@@ -1,23 +1,7 @@
 const fs = require("fs");
 
-// Create ipfsMeta json to hold metadata_uri
-fs.writeFileSync(
-  `E:\\Projects\\generative-art-node\\build\\json\\_ipfsMetas.json`,
-  ""
-);
-const writer = fs.createWriteStream(
-  `E:\\Projects\\generative-art-node\\build\\json\\_ipfsMetas.json`,
-  {
-    flags: "a",
-  }
-);
-
-let meta_array = [];
-
 // Submit ipfs_url to metadata API
-let raw_data = fs.readFileSync(
-  `E:\\Projects\\generative-art-node\\build\\meta\\_metadata.json`
-);
+let raw_data = fs.readFileSync(`../build/meta/_metadata.json`);
 let meta_data = JSON.parse(raw_data);
 for (let i = 0; i < meta_data.length; i++) {
   let url = "https://api.nftport.xyz/v0/metadata";
@@ -33,9 +17,9 @@ for (let i = 0; i < meta_data.length; i++) {
     .then((res) => res.json())
     .then((json) => {
       meta_array.push(json);
+      console.log(`${json.name} metadata uri created`);
     })
     .catch((err) => console.error("error:" + err));
 }
-writer.write(JSON.stringify(json, null, 2));
-writer.end();
+fs.writeFileSync("_ipfsMetas.json", JSON.stringify(meta_array));
 console.log("metadata uploaded & added to _ipfsMetas.json");
